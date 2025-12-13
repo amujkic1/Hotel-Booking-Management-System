@@ -55,7 +55,7 @@ router.get(
       res.status(200).json(bookings);
     } catch (error) {
       console.log("DEBUG ERROR:", error);
-      res.status(500).json({ message: "Unable to fetch bookings" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -101,12 +101,12 @@ router.get(
       // Verify the hotel belongs to the authenticated user
       const hotel = await Hotel.findById(hotelId);
       if (!hotel) {
-        return res.status(404).json({ message: "Hotel not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       // preporuka: hotel.userId.toString() === req.userId
       if (hotel.userId !== req.userId) {
-        return res.status(403).json({ message: "Access denied" });
+        return res.status(403).json({ message: "Forbidden" });
       }
 
       const bookings = await Booking.find({ hotelId })
@@ -116,7 +116,7 @@ router.get(
       res.status(200).json(bookings);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Unable to fetch hotel bookings" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -161,13 +161,13 @@ router.get(
       );
 
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       res.status(200).json(booking);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Unable to fetch booking" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -228,7 +228,7 @@ router.patch(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     try {
@@ -249,13 +249,13 @@ router.patch(
       );
 
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       res.status(200).json(booking);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Unable to update booking" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -314,7 +314,7 @@ router.patch(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     try {
@@ -332,13 +332,13 @@ router.patch(
       );
 
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       res.status(200).json(booking);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Unable to update payment status" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -381,7 +381,7 @@ router.delete(
       const booking = await Booking.findByIdAndDelete(req.params.id);
 
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       // Update hotel analytics
@@ -403,7 +403,7 @@ router.delete(
       res.status(200).json({ message: "Booking deleted successfully" });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Unable to delete booking" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );

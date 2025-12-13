@@ -107,7 +107,7 @@ router.get("/search", async (req: Request, res: Response) => {
     res.json(response);
   } catch (error) {
     console.log("error", error);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -129,7 +129,7 @@ router.get("/", async (req: Request, res: Response) => {
     res.json(hotels);
   } catch (error) {
     console.log("error", error);
-    res.status(500).json({ message: "Error fetching hotels" });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -170,7 +170,7 @@ router.get(
       res.json(hotel);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "Error fetching hotel" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
@@ -223,7 +223,7 @@ router.post(
 
     const hotel = await Hotel.findById(hotelId);
     if (!hotel) {
-      return res.status(400).json({ message: "Hotel not found" });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     const totalCost = hotel.pricePerNight * numberOfNights;
@@ -238,7 +238,7 @@ router.post(
     });
 
     if (!paymentIntent.client_secret) {
-      return res.status(500).json({ message: "Error creating payment intent" });
+      return res.status(500).json({ message: "Internal server error" });
     }
 
     const response = {
@@ -299,14 +299,14 @@ router.post(
       );
 
       if (!paymentIntent) {
-        return res.status(400).json({ message: "payment intent not found" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       if (
         paymentIntent.metadata.hotelId !== req.params.hotelId ||
         paymentIntent.metadata.userId !== req.userId
       ) {
-        return res.status(400).json({ message: "payment intent mismatch" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       if (paymentIntent.status !== "succeeded") {
@@ -344,7 +344,7 @@ router.post(
       res.status(200).send();
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "something went wrong" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );

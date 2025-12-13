@@ -14,7 +14,7 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
   try {
     const user = await User.findById(userId).select("-password");
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(400).json({ message: "Bad request" });
     }
     res.json(user);
   } catch (error) {
