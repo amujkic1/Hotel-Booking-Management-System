@@ -3,6 +3,8 @@ import User from "../models/user";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import verifyToken from "../middleware/auth";
+import { registerLimiter } from "../middleware/rateLimiter";
+
 
 const router = express.Router();
 
@@ -23,6 +25,7 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
 
 router.post(
   "/register",
+  registerLimiter,
   [
     check("firstName", "First Name is required").isString(),
     check("lastName", "Last Name is required").isString(),
@@ -34,7 +37,7 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ message: errors.array() });
+      return res.status(400).json({ message: "Invalid input data" });
     }
 
     try {
@@ -43,7 +46,7 @@ router.post(
       });
 
       if (user) {
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(400).json({ message: "Registration failed" });
       }
 
       user = new User(req.body);

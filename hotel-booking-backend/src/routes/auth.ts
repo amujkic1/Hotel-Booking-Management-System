@@ -4,6 +4,7 @@ import User from "../models/user";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import verifyToken from "../middleware/auth";
+import { registerLimiter } from "../middleware/rateLimiter";
 
 const router = express.Router();
 
@@ -50,6 +51,7 @@ const router = express.Router();
  */
 router.post(
   "/login",
+  registerLimiter,
   [
     check("email", "Email is required").isEmail(),
     check("password", "Password with 6 or more characters required").isLength({
