@@ -61,7 +61,7 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ message: "Invalid input data" });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     const { email, password } = req.body;
@@ -69,12 +69,12 @@ router.post(
     try {
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       const token = jwt.sign(
@@ -103,7 +103,7 @@ router.post(
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Something went wrong" });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );

@@ -14,7 +14,7 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
   try {
     const user = await User.findById(userId).select("-password");
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
     res.json(user);
   } catch (error) {
@@ -37,7 +37,7 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ message: "Invalid input data" });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     try {
@@ -46,7 +46,7 @@ router.post(
       });
 
       if (user) {
-        return res.status(400).json({ message: "Registration failed" });
+        return res.status(400).json({ message: "Bad request" });
       }
 
       user = new User(req.body);
