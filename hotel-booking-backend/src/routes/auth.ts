@@ -61,7 +61,7 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ message: errors.array() });
+      return res.status(400).json({ message: "Invalid input data" });
     }
 
     const { email, password } = req.body;
@@ -102,7 +102,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ message: "Something went wrong" });
     }
   }
@@ -147,15 +147,15 @@ router.get("/validate-token", verifyToken, (req: Request, res: Response) => {
  *         description: Logout successful
  */
 router.post("/logout", (req: Request, res: Response) => {
-  res.cookie("session_id", "", {
-    expires: new Date(0),
-    maxAge: 0,
-    httpOnly: false,
-    secure: true,
-    sameSite: "none",
-    path: "/",
-  });
-  res.send();
+res.cookie("session_id", "", {
+  expires: new Date(0),
+  maxAge: 0,
+  httpOnly: true, 
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/",
+});
+res.status(200).json({ message: "Logout successful" });
 });
 
 export default router;
