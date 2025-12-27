@@ -50,13 +50,28 @@ const SignIn = () => {
       await queryClient.invalidateQueries("validateToken");
       navigate(location.state?.from?.pathname || "/");
     },
-    onError: (error: Error) => {
+  onError: (error: any) => {
+    const status = error?.response?.status;
+    const message =
+      error?.response?.data?.message ||
+      "Invalid email or password";
+
+    if (status === 401) {
       showToast({
         title: "Sign In Failed",
-        description: error.message,
+        description: message,
         type: "ERROR",
       });
-    },
+      return;
+    }
+
+    showToast({
+      title: "Sign In Failed",
+      description: "Something went wrong. Please try again.",
+      type: "ERROR",
+    });
+  },
+
     loadingMessage: "Signing you in...",
   });
 
@@ -147,8 +162,8 @@ const SignIn = () => {
                     {...register("password", {
                       required: "Password is required",
                       minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters",
+                        value: 8,
+                        message: "Password must be at least 8 characters",
                       },
                     })}
                   />
