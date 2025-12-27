@@ -18,21 +18,17 @@ const SignOutButton = () => {
   const navigate = useNavigate();
 
   const mutation = useMutationWithLoading(apiClient.signOut, {
-    onSuccess: async () => {
-      await queryClient.invalidateQueries("validateToken");
+    onSuccess: () => {
       showToast({
         title: "Successfully Signed Out",
-        description:
-          "You have been logged out of your account. Redirecting to sign-in page...",
+        description: "You have been logged out.",
         type: "SUCCESS",
       });
-      navigate("/sign-in");
-      window.location.reload();
     },
-    onError: (error: Error) => {
+    onError: () => {
       showToast({
-        title: "Sign Out Failed",
-        description: error.message,
+        title: "Signed out locally",
+        description: "Server logout failed, but you are signed out in the app.",
         type: "ERROR",
       });
     },
@@ -40,16 +36,12 @@ const SignOutButton = () => {
   });
 
   const clearAuthMutation = useMutationWithLoading(apiClient.signOut, {
-    onSuccess: async () => {
-      await queryClient.invalidateQueries("validateToken");
+    onSuccess: () => {
       showToast({
         title: "Auth State Cleared",
-        description:
-          "Authentication state has been cleared. Redirecting to sign-in page...",
+        description: "Authentication state has been cleared.",
         type: "SUCCESS",
       });
-      navigate("/sign-in");
-      window.location.reload();
     },
     onError: (error: Error) => {
       showToast({
@@ -65,18 +57,30 @@ const SignOutButton = () => {
     apiClient.clearAllStorage();
     showToast({
       title: "Storage Cleared",
-      description:
-        "All browser storage (localStorage, sessionStorage, cookies) has been cleared. Page will reload...",
+      description: "All browser storage has been cleared.",
       type: "SUCCESS",
     });
     window.location.reload();
   };
 
+  const instantClientLogout = () => {
+    queryClient.setQueryData("validateToken", null);
+    queryClient.removeQueries("validateToken");
+    queryClient.removeQueries("fetchCurrentUser");
+    queryClient.removeQueries("my-hotels");
+    queryClient.removeQueries("my-bookings");
+    queryClient.removeQueries("favorites");
+
+    navigate("/sign-in");
+  };
+
   const handleSignOut = () => {
-    mutation.mutate(undefined);
+    instantClientLogout();
+    mutation.mutate(undefined); 
   };
 
   const handleClearAuth = () => {
+    instantClientLogout();
     clearAuthMutation.mutate(undefined);
   };
 
@@ -89,27 +93,21 @@ const SignOutButton = () => {
           <ChevronDown className="w-4 h-4 ml-1 group-hover:scale-110 transition-transform" />
         </button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="w-56 bg-white" align="end">
         <DropdownMenuItem onClick={handleSignOut} className="text-primary-600">
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
         </DropdownMenuItem>
 
-        {/* Development utilities - only show in development */}
         {!import.meta.env.PROD && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleClearAuth}
-              className="text-red-600"
-            >
+            <DropdownMenuItem onClick={handleClearAuth} className="text-red-600">
               <Trash2 className="w-4 h-4 mr-2" />
               Clear Auth State
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={clearAllStorage}
-              className="text-orange-600"
-            >
+            <DropdownMenuItem onClick={clearAllStorage} className="text-orange-600">
               <RefreshCw className="w-4 h-4 mr-2" />
               Clear All Storage
             </DropdownMenuItem>
