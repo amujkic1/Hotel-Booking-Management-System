@@ -35,24 +35,6 @@ const SignOutButton = () => {
     loadingMessage: "Signing out...",
   });
 
-  const clearAuthMutation = useMutationWithLoading(apiClient.signOut, {
-    onSuccess: () => {
-      showToast({
-        title: "Auth State Cleared",
-        description: "Authentication state has been cleared.",
-        type: "SUCCESS",
-      });
-    },
-    onError: (error: Error) => {
-      showToast({
-        title: "Clear Auth Failed",
-        description: error.message,
-        type: "ERROR",
-      });
-    },
-    loadingMessage: "Clearing auth state...",
-  });
-
   const clearAllStorage = () => {
     apiClient.clearAllStorage();
     showToast({
@@ -64,9 +46,9 @@ const SignOutButton = () => {
   };
 
   const instantClientLogout = () => {
-    queryClient.setQueryData("validateToken", null);
     queryClient.removeQueries("validateToken");
-    queryClient.removeQueries("fetchCurrentUser");
+    queryClient.removeQueries("currentUser"); 
+
     queryClient.removeQueries("my-hotels");
     queryClient.removeQueries("my-bookings");
     queryClient.removeQueries("favorites");
@@ -76,12 +58,16 @@ const SignOutButton = () => {
 
   const handleSignOut = () => {
     instantClientLogout();
-    mutation.mutate(undefined); 
+    mutation.mutate(undefined);
   };
 
   const handleClearAuth = () => {
     instantClientLogout();
-    clearAuthMutation.mutate(undefined);
+    showToast({
+      title: "Auth State Cleared",
+      description: "Authentication state has been cleared (local).",
+      type: "SUCCESS",
+    });
   };
 
   return (
@@ -107,7 +93,10 @@ const SignOutButton = () => {
               <Trash2 className="w-4 h-4 mr-2" />
               Clear Auth State
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={clearAllStorage} className="text-orange-600">
+            <DropdownMenuItem
+              onClick={clearAllStorage}
+              className="text-orange-600"
+            >
               <RefreshCw className="w-4 h-4 mr-2" />
               Clear All Storage
             </DropdownMenuItem>

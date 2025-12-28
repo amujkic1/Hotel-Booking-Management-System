@@ -34,29 +34,35 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const [globalLoadingMessage, setGlobalLoadingMessage] = useState(
     "Hotel room is getting ready..."
   );
-  const [user, setUser] = useState<UserType | null>(null);
 
   const { toast } = useToast();
 
-  // One-time cleanup: remove legacy localStorage token if it existed in older versions
   useEffect(() => {
     localStorage.removeItem("session_id");
   }, []);
 
   const {
-    isError,
-    isLoading,
     data: validateData,
+    isLoading: isAuthLoading,
+    isError,
     error,
   } = useQuery("validateToken", apiClient.validateToken, {
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
-    enabled: true,
   });
 
-  // Logged in ONLY if server validates auth_token cookie
-  const isLoggedIn = !isLoading && !isError && !!validateData;
+  const isLoggedIn = !isAuthLoading && !isError && !!validateData;
+
+  const { data: user } = useQuery<UserType>(
+    "currentUser",
+    apiClient.fetchCurrentUser,
+    {
+      enabled: isLoggedIn,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   useEffect(() => {
     const status = (error as any)?.response?.status;
@@ -64,24 +70,6 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       localStorage.removeItem("user_id");
     }
   }, [error]);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      if (!isLoggedIn) {
-        setUser(null);
-        return;
-      }
-
-      try {
-        const me = await apiClient.fetchCurrentUser();
-        setUser(me);
-      } catch (e) {
-        setUser(null);
-      }
-    };
-
-    loadUser();
-  }, [isLoggedIn]);
 
   const showToast = (toastMessage: ToastMessage) => {
     const variant =
@@ -109,7 +97,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     () => ({
       showToast,
       isLoggedIn,
-      user,
+      user: user ?? null,
       stripePromise,
       showGlobalLoading,
       hideGlobalLoading,

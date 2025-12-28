@@ -47,30 +47,33 @@ const SignIn = () => {
           "Welcome back! You have been successfully signed in to your account.",
         type: "SUCCESS",
       });
-      await queryClient.invalidateQueries("validateToken");
+
+      await Promise.all([
+        queryClient.refetchQueries("validateToken"),
+        queryClient.refetchQueries("currentUser"),
+      ]);
+
       navigate(location.state?.from?.pathname || "/");
     },
-  onError: (error: any) => {
-    const status = error?.response?.status;
-    const message =
-      error?.response?.data?.message ||
-      "Invalid email or password";
+    onError: (error: any) => {
+      const status = error?.response?.status;
+      const message = error?.response?.data?.message || "Invalid email or password";
 
-    if (status === 401) {
+      if (status === 401) {
+        showToast({
+          title: "Sign In Failed",
+          description: message,
+          type: "ERROR",
+        });
+        return;
+      }
+
       showToast({
         title: "Sign In Failed",
-        description: message,
+        description: "Something went wrong. Please try again.",
         type: "ERROR",
       });
-      return;
-    }
-
-    showToast({
-      title: "Sign In Failed",
-      description: "Something went wrong. Please try again.",
-      type: "ERROR",
-    });
-  },
+    },
 
     loadingMessage: "Signing you in...",
   });
@@ -103,7 +106,6 @@ const SignIn = () => {
             <CardDescription className="text-gray-600">
               Sign in to your account to continue
             </CardDescription>
-
           </CardHeader>
 
           {/* Form */}

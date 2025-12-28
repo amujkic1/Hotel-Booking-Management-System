@@ -59,7 +59,7 @@ const Register = () => {
         description: "Your account has been created successfully! Welcome to BookInn.",
         type: "SUCCESS" 
       });
-      await queryClient.invalidateQueries("validateToken");
+      await queryClient.refetchQueries("validateToken");
       navigate("/");
     },
     onError: (error: any) => {
