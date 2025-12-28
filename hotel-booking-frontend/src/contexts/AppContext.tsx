@@ -18,6 +18,7 @@ export type AppContext = {
   showToast: (toastMessage: ToastMessage) => void;
   isLoggedIn: boolean;
   user: UserType | null;
+  isLoading: boolean; 
   stripePromise: Promise<Stripe | null>;
   showGlobalLoading: (message?: string) => void;
   hideGlobalLoading: () => void;
@@ -98,13 +99,14 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       showToast,
       isLoggedIn,
       user: user ?? null,
+      isLoading: isAuthLoading, 
       stripePromise,
       showGlobalLoading,
       hideGlobalLoading,
       isGlobalLoading,
       globalLoadingMessage,
     }),
-    [isLoggedIn, user, isGlobalLoading, globalLoadingMessage]
+    [isLoggedIn, user, isGlobalLoading, globalLoadingMessage, isAuthLoading]
   );
 
   return (

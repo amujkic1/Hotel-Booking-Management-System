@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import useAppContext from "../hooks/useAppContext";
+import LoadingSpinner from "./LoadingSpinner"; 
 
 type Props = {
   children: JSX.Element;
@@ -7,13 +8,21 @@ type Props = {
 };
 
 const ProtectedRoute = ({ children, roles }: Props) => {
-  const { isLoggedIn, user } = useAppContext();
+  const { isLoggedIn, user, isLoading } = useAppContext();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner message="Checking authentication..." />
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <Navigate to="/sign-in" replace />;
   }
 
-  if (roles && user && !roles.includes(user.role!)) {
+  if (roles && user && !roles.includes(user.role as any)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
